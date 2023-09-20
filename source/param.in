@@ -1,0 +1,160 @@
+!=====================================================================
+! PARAMETER FILE FOR 3D-DNS USING FOURIER DECOMPOSITION
+!=====================================================================
+!
+!=====================================================================
+! Numerics
+!=====================================================================
+0           ! Fluid solver                   ! SOLVE_FLUID
+!---------------------------------------------------------------------
+64           ! Mesh Size                      ! NX
+64           ! Mesh Size                      ! NY
+64           ! Mesh Size                      ! NZ
+!---------------------------------------------------------------------
+1.00000E-5   ! Time step                      ! DTIME
+10000        ! Maximum Cycle number           ! NCYCLEMAX
+!---------------------------------------------------------------------
+1            ! Frozen Flow with Fluid Vel.    ! FROZEN_FLOW
+0            ! Fluid velocity init            ! INIT_FLUID_VELOCITY
+.false.      ! Forcing flag                   ! STEADY
+5.0E-2       ! Forcing variance               ! SIGMA_FORCE
+0.08         ! Forcing time                   ! TIME_FORCE
+2.0          ! First forced wave (k/k0)       ! KFORCE_MIN
+6.0          ! Last forced wave  (k/k0)       ! KFORCE_MAX
+!---------------------------------------------------------------------
+.false.      ! Passive scalar equation        ! SOLVE_SCALAR
+0            ! Initiation                     ! INIT_SCALAR
+!---------------------------------------------------------------------
+.true.       ! Particle trajectory            ! SOLVE_PART
+.false.      ! Dry Granular in Channel        ! DRY_CHANNEL
+1            ! Number of particle species     ! NIG
+10000        ! Number of particle             ! NPMAX
+.false.      ! Wall B.C. Flag                 ! WALL_BOUNDARY
+3            ! Interpolation scheme           ! INTERP_SCHEME
+2            ! Particle position init         ! INIT_PART_POSITION
+2            ! Particle velocity init         ! INIT_PART_VELOCITY
+0            ! Particle scalar init           ! INIT_PART_SCALAR
+!=====================================================================
+! Statistics
+!=====================================================================
+.false.      ! Restart statistics             ! READSTAT
+.true.       ! Time averaging                 ! STAT_TIME
+        -----!------
+1            ! level of fluid statistics      ! LEVEL_STFLU 
+        -----!------
+.false.      ! 1st level of scalar statistics ! LEVEL1_STSCL 
+.false.      ! 2nd level of scalar statistics ! LEVEL2_STSCL 
+        -----!------
+.false.      ! 1st level of part statistics   ! LEVEL1_STPAR 
+.false.      ! 2nd level of part statistics   ! LEVEL2_STPAR 
+.false.      ! 3rd level of part statistic    ! LEVEL3_STPAR
+.false.      ! part stats along X(with Wall)  ! LEVELX_STPAR
+.false.      ! part pdf for ellipsoids        ! LEVEL1_STPDF
+!---------------------------------------------------------------------
+! Outputing
+!---------------------------------------------------------------------
+10           ! Screen                               ! FOUT0
+1            ! Solution                             ! FOUT1
+1            ! Statistics                           ! FOUT2
+0            ! Statistics                           ! FOUT3
+2            ! XStatistics                          ! FOUT4
+0            ! Statistics                           ! FOUT5
+0            ! Ensight format                       ! ENSIGHT
+28           ! Number of Slices                     ! NSLICES
+1.3          ! Geometric ratio for slice spacing    ! REFINE_MESH
+!=====================================================================
+! Fluid properties
+!=====================================================================
+0.314        ! Box size                       ! LXMAX
+0.314        ! Box size                       ! LYMAX
+0.314        ! Box size                       ! LZMAX
+1.515E-5     ! Molecular viscosity (m2/s)     ! VISC
+1.205        ! Density   (kg/m3)              ! RHOF
+!=====================================================================
+! Scalar properties
+!=====================================================================
+1.43E-3      ! Diffusivity                    ! DIFF_SCL
+1005.0       ! Specific "heat"                ! CP_SCL
+0.010E+0     ! Imposed mean gradient          ! GRAD_SCL
+!=====================================================================
+! Particle properties
+!====================================================================
+2    1        ! Particle kind                  ! PARTDEF, COLLIDEF
+500.0E-6      ! Semi Major Axis (m)            ! EMAJ_PART_USER
+1.5           ! Aspect Ratio                   ! APR_PART
+1038.00       ! Density  (kg/m3)               ! RHOP
+1.0  0.0      ! Rest. Coef. & Friction Coeff.  ! ECP, MUP
+0.0           ! Gravity along z                ! GRAVITY
+1005.0        ! Specific "heat"                ! CP_SCL
+1             ! Polydisperse parameters        ! POLYDISP
+0.0  1.0  1.0 ! Bidisperse Parameters          ! NQ_NP, DP_DQ, RHOP_RHOQ
+!======================== Wall Properties=============================
+1.0           ! Resti. Coeff. of Wall          ! ECW
+0.0           ! Friction Coeff. of Wall        ! MUW
+0.0           ! Tangt. Rest. Coeff. of Wall    ! BETAW
+!---------------------------------------------------------------------
+.false.  128 ! Filtering fluid vel. seen      ! FILTERING, KCUT
+!=====================================================================
+! PARAMETER DESCRIPTION
+!=====================================================================
+
+! For more details please refer to the Fortran file.
+!
+!---------------------------------------------------------------------
+! Fluid phase
+!---------------------------------------------------------------------
+!- Fluid Initiation
+INIT_FLUID_VELOCITY
+    = 0 : Uf = 0
+    = 1 : Random value
+    = 2 : Uniform fluid velocity (defined in fortran file)
+    = 3 : Read fluid velocity field read from thi generating code
+    = 4 : Read fluid velocity field read from stored files
+
+!- Statistics on the fluid
+LEVEL1_STFLU !- One point statistics (mean, Reynolds stress, 3rd & 4th-order)
+LEVEL2_STFLU !- Divergence, dissipation
+LEVEL3_STFLU !- Skewness, Flatness, PDF of fluid velocity & gradients
+LEVEL4_STFLU !- Two points statistics (Spatial correlation)
+
+
+!---------------------------------------------------------------------
+! Scalar phase
+!---------------------------------------------------------------------
+!- Scalar Initiation
+INIT_SCALAR = 0 : theta = a given value
+            = 1 : Uniform distribution arround the given value
+            = 2 : Scalar field read from stored files
+
+
+!---------------------------------------------------------------------
+! Particle phase
+!---------------------------------------------------------------------
+!- Interpolation scheme 
+INTERP_SCHEME = 1 : 1st order Lagrangian polynomial
+              = 2 : 2nd order Lagrangian polynomial
+              = 3 : 3rd order Lagrangian polynomial
+              = 4 : 4th order Lagrangian polynomial
+
+!- Particle initiation
+INIT_PART_POSITION = 0 : Given by a user 
+                   = 1 : 
+             	   = 2 : Random
+                   = 3 : Read particle velocity from stored files
+
+!- Particle initiation
+INIT_PART_VELOCITY = 0 : Up = 0
+                   = 1 : 
+	        	   = 2 : Random
+                   = 3 : Read particle velocity from stored files
+
+!- Particle definition
+PARTDEF = 0 : Motionless particles
+        = 1 : Fluid elements
+        = 2 : Inertial particles
+
+!- Statistics on the particle
+LEVEL1_STPAR !- One point statistics (mean, Reynolds stress)
+LEVEL2_STPAR !- Lagrangian function
+LEVEL3_STPAR !- Spatial distribution
+

@@ -1,0 +1,96 @@
+FC	= mpif90
+LD	= $(FC)
+F90	= $(FC)
+SWP	= 
+RM	= /bin/rm -f
+MP	=
+#OLEVEL	= -O3 -mnoieee-fp -unroll -msse2
+OLEVEL	= -O3 -msse2 -unroll
+FOPTS	= -r8 
+#FOPTS	= -r8 -ftrapuv -check bounds
+FFLAGS	= $(FOPTS) $(OLEVEL)
+LIBS	=/PRODCOM/FFTW/p3dfft-2.3.2-ifortv2011.2/lib/libp3dfft.a \
+         /PRODCOM/FFTW/fftw-3.2.2-ifortv2011.2/lib/libfftw3.a
+INCLUDE =-I/PRODCOM/FFTW/p3dfft-2.3.2-ifortv2011.2/include \
+         -I/PRODCOM/FFTW/fftw-3.2.2-ifortv2011.2/include
+LDFLAGS	= $(FOPTS) $(OLEVEL)
+PROF	=
+
+
+MODOBJS	= \
+module_var.o \
+MPI_structures.o \
+utilities_cpu.o \
+exchange_part.o
+
+
+FLUOBJS	= \
+add_forcing.o \
+adv_fluid.o\
+allocate_arrays.o\
+build_rhs_arg.o \
+build_rhs_vort.o \
+build_rhs_dealias.o \
+check_cfl.o \
+cputime_info.o \
+corrtwopts.o \
+divergence.o \
+fluid_gradient.o \
+fluid_prediction.o \
+inforun.o\
+init_run.o \
+initiation_fluid.o\
+initiation_forcing.o\
+meshing.o \
+openclose.o \
+print_fluid.o \
+proj_divfree.o \
+print_timestat.o \
+readparam.o \
+save_fluid.o\
+spec3d.o\
+stat_fluid.o \
+main.o
+
+PAROBJS	= \
+boundary_particle.o\
+initiation_particle_position.o \
+initiation_particle_velocity.o \
+save_particle.o \
+interpH.o\
+interp_lag1.o\
+interp_lag2.o\
+interp_lag3.o\
+interp_lag4.o \
+drag_model.o \
+adv_particle_position.o \
+adv_particle_velocity.o \
+stat_particle.o \
+particle_tracking.o \
+print_lagfunction.o
+
+SCLOBJS	= \
+initiation_scalar.o\
+adv_scalar.o\
+stat_scalar.o\
+save_scalar.o\
+spec3d_scalar.o
+
+
+MOD	= *.mod
+OBJS	= $(MODOBJS) $(FLUOBJS) $(PAROBJS) $(SCLOBJS) 
+EXEC    = /home2/fede/NS3D_WORKDIR/ns3dlag
+
+$(EXEC):	$(OBJS)
+	$(LD) $(FFLAGS) $(OBJS) $(LIBS) $(INCLUDE) -o $@
+
+clean:
+	$(RM) $(OBJS) $(MOD) $(EXEC)
+
+cpart:
+	$(RM) $(PAROBJS) $(MOD) $(EXEC)
+
+.SUFFIXES: .o .f90 
+
+.f90.o:
+	$(FC)  -c $(FFLAGS) $(INCLUDE) $<

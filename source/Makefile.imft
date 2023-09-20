@@ -1,0 +1,19 @@
+FC      = mpif90
+LD      = $(FC)
+F90     = $(FC)
+SWP     =
+RM      = /bin/rm -f
+MP      =
+OLEVEL = -O3 #-unroll #-mnofree-fp -msse2
+FOPTS   = -pthread -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -g -Wall -fcheck=all -fbacktrace
+#-lstdc++ -g -ftrapuv # -ffree-line-length-none #-fcheck= bounds
+FFLAGS  = $(FOPTS) $(OLEVEL)
+#MKL = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+FFTWDIR = /PRODCOM/Ubuntu20.04/Gcc-9.3.0-Mpich-3.3.2/FFTW/3.3.8-gcc-9.3.0-mpich-3.3.2
+P3DFFTDIR = /PRODCOM/Ubuntu20.04/Gcc-9.3.0-Mpich-3.3.2/p3dfft/2.7.9-gcc-9.3.0-mpich-3.3.2
+#TECPLOTDIR = /PRODCOM/TECPLOT/tec360-2011r2/x86-64-2.9
+LIBS    = $(P3DFFTDIR)/lib/libp3dfft.a $(FFTWDIR)/lib/libfftw3.a #\
+          #$(TECPLOTDIR)/lib/tecio.a $(MKL) 
+INCLUDE = -I$(P3DFFTDIR)/include -I$(FFTWDIR)/include #-I$(TECPLOTDIR)/include 
+LDFLAGS = $(FOPTS) $(OLEVEL)
+PROF    =

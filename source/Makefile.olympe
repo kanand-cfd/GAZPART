@@ -1,0 +1,18 @@
+FC      = mpiifort
+LD      = $(FC)
+F90     = $(FC)
+SWP     =
+RM      = /bin/rm -f
+MP      =
+OLEVEL  = -O3 -traceback -fpe3 -xAVX -fno-alias -ip -msse2 -unroll
+#~ OLEVEL       = -O3 -unroll -no-prec-div -no-prec-sqrt
+#OLEVEL = -O3
+#FOPTS   = -r8 #-g #-lstdc++
+FOPTS  = -pthread -r8 -ftrapuv -g -lstdc++ -check bounds
+FFLAGS  = $(FOPTS) $(OLEVEL)
+FFTWDIR = /usr/local/p3dfft/2.7.7
+LIBS    = $(FFTWDIR)/lib/libp3dfft.a -mkl 
+INCLUDE =-I$(FFTWDIR)/include
+LDFLAGS = $(FOPTS) $(OLEVEL)
+PROF    =
+
