@@ -25,7 +25,7 @@ do J = 1, NIG
 
    do IDP = 1, POLYDISP(J)
 
-        DPART = 2.0*EMAJ_PART(J,IDP)!/APR_PART(J)
+        DPART = 2.0*EMAJ_PART(J,IDP)/APR_PART(J)
 !!=================================
 !!- Non-uniform mesh
 !!=================================
