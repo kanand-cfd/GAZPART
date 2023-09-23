@@ -355,7 +355,7 @@ do J = 1, NIG
                 !!==========================================================================!!
                 !!              If Intersection & Particle is moving towards wall           !!
                 !!==========================================================================!!
-                if(isIntersect .and. VRNRM<0.0) then
+                if(isIntersect .and. UP1*wall_normal(1,1) <0.0) then
 
                     !delt = abs(delta_x)/abs(VPC(1,1)) !DTIME * (abs(PART(I,J)%XP - x_wall)/abs(PART(I,J)%XP - XP1)) !abs(delta_x)/abs(PART(I,J)%UP)
 
