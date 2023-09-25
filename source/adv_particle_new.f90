@@ -357,20 +357,20 @@ do J = 1, NIG
                 !!==========================================================================!!
                 if(isIntersect .and. UP1*wall_normal(1,1) <0.0) then
 
-                    !delt = abs(delta_x)/abs(VPC(1,1)) !DTIME * (abs(PART(I,J)%XP - x_wall)/abs(PART(I,J)%XP - XP1)) !abs(delta_x)/abs(PART(I,J)%UP)
+                    delt = abs(delta_x)/sqrt(VPC(1,1)**2 + VPC(2,1)**2 + VPC(3,1)**2) !DTIME * (abs(PART(I,J)%XP - x_wall)/abs(PART(I,J)%XP - XP1)) !abs(delta_x)/abs(PART(I,J)%UP)
 
                     !write(*,*) ' Before Update ', XP1, YP1, ZP1, UP1, VP1, WP1
                     !Update the particle position
-                    !YP1 = PART(I,J)%YP + delt*K1_XP(2,1)
-                    !ZP1 = PART(I,J)%ZP + delt*K1_XP(3,1)
+                    YP1 = PART(I,J)%YP + delt*K1_XP(2,1)
+                    ZP1 = PART(I,J)%ZP + delt*K1_XP(3,1)
 
-                    !UP1 = PART(I,J)%UP + delt*K1_UP(1,1)
-                    !VP1 = PART(I,J)%VP + delt*K1_UP(2,1)
-                    !WP1 = PART(I,J)%WP + delt*K1_UP(3,1)
+                    UP1 = PART(I,J)%UP + delt*K1_UP(1,1)
+                    VP1 = PART(I,J)%VP + delt*K1_UP(2,1)
+                    WP1 = PART(I,J)%WP + delt*K1_UP(3,1)
 
-                    !OMGX1 = PART(I,J)%OMEGAX + delt*K1_OMG(1,1)
-                    !OMGY1 = PART(I,J)%OMEGAY + delt*K1_OMG(2,1) 
-                    !OMGZ1 = PART(I,J)%OMEGAZ + delt*K1_OMG(3,1)
+                    OMGX1 = PART(I,J)%OMEGAX + delt*K1_OMG(1,1)
+                    OMGY1 = PART(I,J)%OMEGAY + delt*K1_OMG(2,1) 
+                    OMGZ1 = PART(I,J)%OMEGAZ + delt*K1_OMG(3,1)
 
                     !!=================================================================================!!
                     !! RK2 ========================= Particle Wall Bouncing ====================== RK2 !!
@@ -416,22 +416,22 @@ do J = 1, NIG
                     K2_OMG(2,1) = (FTORQUE(2,1) + OMGZ1*OMGX1*(IPZZ(J,IDP) - IPXX(J,IDP))) / IPYY(J,IDP) ! omega_y
                     K2_OMG(3,1) = (FTORQUE(3,1) + OMGX1*OMGY1*(IPXX(J,IDP) - IPYY(J,IDP))) / IPZZ(J,IDP) ! omega_z
 
-                    PART(I,J)%XP = XP1 + (DTIME)*K2_XP(1,1)
-                    PART(I,J)%YP = YP1 + (DTIME)*K2_XP(2,1)
-                    PART(I,J)%ZP = ZP1 + (DTIME)*K2_XP(3,1)
+                    PART(I,J)%XP = XP1 + (DTIME - delt)*K2_XP(1,1)
+                    PART(I,J)%YP = YP1 + (DTIME - delt)*K2_XP(2,1)
+                    PART(I,J)%ZP = ZP1 + (DTIME - delt)*K2_XP(3,1)
 
-                    PART(I,J)%UP = UP1 + (DTIME)*K2_UP(1,1)
-                    PART(I,J)%VP = VP1 + (DTIME)*K2_UP(2,1)
-                    PART(I,J)%WP = WP1 + (DTIME)*K2_UP(3,1)
+                    PART(I,J)%UP = UP1 + (DTIME - delt)*K2_UP(1,1)
+                    PART(I,J)%VP = VP1 + (DTIME - delt)*K2_UP(2,1)
+                    PART(I,J)%WP = WP1 + (DTIME - delt)*K2_UP(3,1)
 
-                    PART(I,J)%OMEGAX = OMGX1 + (DTIME)*K2_OMG(1,1)
-                    PART(I,J)%OMEGAY = OMGY1 + (DTIME)*K2_OMG(2,1)
-                    PART(I,J)%OMEGAZ = OMGZ1 + (DTIME)*K2_OMG(3,1)
+                    PART(I,J)%OMEGAX = OMGX1 + (DTIME - delt)*K2_OMG(1,1)
+                    PART(I,J)%OMEGAY = OMGY1 + (DTIME - delt)*K2_OMG(2,1)
+                    PART(I,J)%OMEGAZ = OMGZ1 + (DTIME - delt)*K2_OMG(3,1)
 
                     !!!!!!! Integrate Quaternion !!!!!!
                     PART(I,J)%ELLQUAT = QUAT1
 
-                    call QUATERNION_INTEGRATION(PART(I,J)%ELLQUAT, PART(I,J)%OMEGAX, PART(I,J)%OMEGAY, PART(I,J)%OMEGAZ, DTIME)
+                    call QUATERNION_INTEGRATION(PART(I,J)%ELLQUAT, PART(I,J)%OMEGAX, PART(I,J)%OMEGAY, PART(I,J)%OMEGAZ, DTIME-delt)
 
 
                     !if(wall_normal(1,1) == 1.0) then
