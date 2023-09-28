@@ -346,31 +346,73 @@ do J = 1, NIG
                 VPC(2,1) = U_P(2,1) + (OMG_lab(3,1)*impact_arm(1,1) - OMG_lab(1,1)*impact_arm(3,1))
                 VPC(3,1) = U_P(3,1) + (OMG_lab(1,1)*impact_arm(2,1) - OMG_lab(2,1)*impact_arm(1,1))
 
-                VRNRM = VPC(1,1)*wall_normal(1,1) + VPC(2,1)*wall_normal(2,1) + VPC(3,1)*wall_normal(3,1)
+                !VRNRM = VPC(1,1)*wall_normal(1,1) + VPC(2,1)*wall_normal(2,1) + VPC(3,1)*wall_normal(3,1)
 
-                x_wall =  XP1 + delta_x
+                !x_wall =  XP1 + delta_x
                     
-                if(isIntersect) XP1 = x_wall
+                !if(isIntersect) XP1 = x_wall
 
                 !!==========================================================================!!
                 !!              If Intersection & Particle is moving towards wall           !!
                 !!==========================================================================!!
                 if(isIntersect .and. UP1*wall_normal(1,1) <0.0) then
 
+                    x_wall =  XP1 + delta_x
+
+                    XP1 = x_wall
+
                     delt = abs(delta_x)/sqrt(VPC(1,1)**2 + VPC(2,1)**2 + VPC(3,1)**2) !DTIME * (abs(PART(I,J)%XP - x_wall)/abs(PART(I,J)%XP - XP1)) !abs(delta_x)/abs(PART(I,J)%UP)
 
                     !write(*,*) ' Before Update ', XP1, YP1, ZP1, UP1, VP1, WP1
                     !Update the particle position
-                    YP1 = PART(I,J)%YP + delt*K1_XP(2,1)
-                    ZP1 = PART(I,J)%ZP + delt*K1_XP(3,1)
 
-                    UP1 = PART(I,J)%UP + delt*K1_UP(1,1)
-                    VP1 = PART(I,J)%VP + delt*K1_UP(2,1)
-                    WP1 = PART(I,J)%WP + delt*K1_UP(3,1)
+                    !XP1 = PART(I,J)%XP + (DTIME - delt)*K1_XP(1,1)
+                    YP1 = PART(I,J)%YP + (DTIME - delt)*K1_XP(2,1)
+                    ZP1 = PART(I,J)%ZP + (DTIME - delt)*K1_XP(3,1)
 
-                    OMGX1 = PART(I,J)%OMEGAX + delt*K1_OMG(1,1)
-                    OMGY1 = PART(I,J)%OMEGAY + delt*K1_OMG(2,1) 
-                    OMGZ1 = PART(I,J)%OMEGAZ + delt*K1_OMG(3,1)
+                    UP1 = PART(I,J)%UP + (DTIME - delt)*K1_UP(1,1)
+                    VP1 = PART(I,J)%VP + (DTIME - delt)*K1_UP(2,1)
+                    WP1 = PART(I,J)%WP + (DTIME - delt)*K1_UP(3,1)
+
+                    OMGX1 = PART(I,J)%OMEGAX + (DTIME - delt)*K1_OMG(1,1)
+                    OMGY1 = PART(I,J)%OMEGAY + (DTIME - delt)*K1_OMG(2,1) 
+                    OMGZ1 = PART(I,J)%OMEGAZ + (DTIME - delt)*K1_OMG(3,1)
+
+                    !!!!!!! Integrate Quaternion !!!!!!
+                    QUAT1 = PART(I,J)%ELLQUAT
+
+                    call QUATERNION_INTEGRATION(QUAT1, OMGX1, OMGY1, OMGZ1, DTIME - delt)
+
+                    !if(wall_normal(1,1) == 1.0) then
+
+                    !    wall_pos(1,1) = 0.0
+                    !    wall_pos(2,1) = PART(I,J)%YP
+                    !    wall_pos(3,1) = PART(I,J)%ZP
+
+                    !else
+
+                    !    wall_pos(1,1) = LXMAX
+                    !    wall_pos(2,1) = PART(I,J)%YP
+                    !    wall_pos(3,1) = PART(I,J)%ZP
+
+                    !end if
+
+                    !call closest_point_plane(PART(I,J)%XP, PART(I,J)%YP, PART(I,J)%ZP, &
+                    !                        PART(I,J)%ELLQUAT,                         &
+                    !                        wall_pos,wall_normal,                      &
+                    !                        plane_pt,margin, J, IDP) 
+
+                    !if((1.0 - margin) > 1.0e-3) then 
+                    !    write(*,*) ' '
+                    !    write(*,*) 'Still intersecting after rebound', NCYCLE, I, margin
+                    !    write(*,*) PART(I,J)%XP, PART(I,J)%YP, PART(I,J)%ZP, PART(I,J)%UP, PART(I,J)%VP, PART(I,J)%WP 
+                    !    write(*,*) DTIME, delt
+                    !    if(wall_normal(1,1)==1.0) write(*,*)  'Wall at X=0'
+                    !    if(wall_normal(1,1)==-1.0) write(*,*) 'Wall at X=LXMAX'
+                        !stop
+
+                    !end if 
+
 
                     !!=================================================================================!!
                     !! RK2 ========================= Particle Wall Bouncing ====================== RK2 !!
@@ -416,22 +458,22 @@ do J = 1, NIG
                     K2_OMG(2,1) = (FTORQUE(2,1) + OMGZ1*OMGX1*(IPZZ(J,IDP) - IPXX(J,IDP))) / IPYY(J,IDP) ! omega_y
                     K2_OMG(3,1) = (FTORQUE(3,1) + OMGX1*OMGY1*(IPXX(J,IDP) - IPYY(J,IDP))) / IPZZ(J,IDP) ! omega_z
 
-                    PART(I,J)%XP = XP1 + (DTIME - delt)*K2_XP(1,1)
-                    PART(I,J)%YP = YP1 + (DTIME - delt)*K2_XP(2,1)
-                    PART(I,J)%ZP = ZP1 + (DTIME - delt)*K2_XP(3,1)
+                    PART(I,J)%XP = XP1 + (delt)*K2_XP(1,1)
+                    PART(I,J)%YP = YP1 + (delt)*K2_XP(2,1)
+                    PART(I,J)%ZP = ZP1 + (delt)*K2_XP(3,1)
 
-                    PART(I,J)%UP = UP1 + (DTIME - delt)*K2_UP(1,1)
-                    PART(I,J)%VP = VP1 + (DTIME - delt)*K2_UP(2,1)
-                    PART(I,J)%WP = WP1 + (DTIME - delt)*K2_UP(3,1)
+                    PART(I,J)%UP = UP1 + (delt)*K2_UP(1,1)
+                    PART(I,J)%VP = VP1 + (delt)*K2_UP(2,1)
+                    PART(I,J)%WP = WP1 + (delt)*K2_UP(3,1)
 
-                    PART(I,J)%OMEGAX = OMGX1 + (DTIME - delt)*K2_OMG(1,1)
-                    PART(I,J)%OMEGAY = OMGY1 + (DTIME - delt)*K2_OMG(2,1)
-                    PART(I,J)%OMEGAZ = OMGZ1 + (DTIME - delt)*K2_OMG(3,1)
+                    PART(I,J)%OMEGAX = OMGX1 + (delt)*K2_OMG(1,1)
+                    PART(I,J)%OMEGAY = OMGY1 + (delt)*K2_OMG(2,1)
+                    PART(I,J)%OMEGAZ = OMGZ1 + (delt)*K2_OMG(3,1)
 
                     !!!!!!! Integrate Quaternion !!!!!!
                     PART(I,J)%ELLQUAT = QUAT1
 
-                    call QUATERNION_INTEGRATION(PART(I,J)%ELLQUAT, PART(I,J)%OMEGAX, PART(I,J)%OMEGAY, PART(I,J)%OMEGAZ, DTIME-delt)
+                    call QUATERNION_INTEGRATION(PART(I,J)%ELLQUAT, PART(I,J)%OMEGAX, PART(I,J)%OMEGAY, PART(I,J)%OMEGAZ, delt)
 
 
                     !if(wall_normal(1,1) == 1.0) then
